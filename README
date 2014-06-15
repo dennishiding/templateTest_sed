@@ -1,0 +1,16 @@
+
+After expanding the files in this project run
+
+    ./reconf 
+
+from the base directory.  Then
+
+    cd build
+    make
+
+To run the example test
+
+    cd test
+    ./templateTest
+
+

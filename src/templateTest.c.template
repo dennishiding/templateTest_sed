@@ -1,0 +1,112 @@
+
+
+#include "templateTest_DATASUFFIX.h"
+#include <stdlib.h>
+#include <stdint.h>
+
+
+/*********************************************************************/
+/** separate a vector
+ *
+ *  For each interval of I_length elements of source,  
+ *  number the elements in the inteval 0..I_length-1.   
+ *  The element corresponding to  I_select is placed in 
+ *  vector V2,  the other elements are placed in vector V1.  
+ *  The interval is moved forward to the next I_length elements 
+ *  of source and the process repeated.   
+ *
+ *  The first interval of src may be incomplete (as if some of the 
+ *  interval was in data that preceded the start of the src vector)
+ *  In this case I_start is non-zero an indicates the starting 
+ *  posistion of the first sample of the src within the first interval.
+ *  
+ *  Partial intervals at the beginning or end of pSrc are processed
+ *  so that all elements of src will be transferred to one of either 
+ *  v1 or v2.
+ *
+ *  /return non-zero on error, no output written,  expected
+ *      lengths that would have been writen are updated.
+ *
+ *  Expected to be called for small values of length (2-8)
+ *  Not optimized for vector copies of long runs that higher lengths
+ *  would allow.
+ *
+ *********************************************************************/
+int vectorSeparate_DATASUFFIX(
+  uint32_t         I_length     /**< IN: interval length              */
+  ,uint32_t        I_start      /**< IN: position 0..length-1 in 
+                                 *       intveral of pSrc[0]          */
+  ,uint32_t        I_select     /**< IN: which element of each inteval
+                                 *       is separated to v2           */
+  ,const DATATYPE *pSrc         /**< IN: vector to separate           */
+  ,uint32_t        srcLen       /**< IN: num elements in Src          */   
+  ,DATATYPE       *pV1          /**< OUT: v1 of separation            */
+  ,uint32_t        maxV1        /**< IN: num buffer elements v1       */
+  ,uint32_t       *pNumV1       /**< OUT: written num elements v1     */
+  ,DATATYPE       *pV2          /**< OUT: v2 of separation            */
+  ,uint32_t        maxV2        /**< IN: num buffer elements v2       */
+  ,uint32_t       *pNumV2       /**< OUT: written num elements v2     */
+  )
+{
+  int errval=0;
+  uint32_t  numV1=0;
+  uint32_t  numV2=0;
+  uint32_t  fullCount;
+  uint32_t  intervalCount;
+  uint32_t  i;
+
+  if(srcLen >= (I_length + I_start ) )
+  {
+    fullCount = ( srcLen - (I_length - I_start) ) / I_length  ;
+    numV2 = fullCount;              /* full interval V2   */
+    numV2 += ((I_select>=I_start)
+              ? 1:0) ;             /* first interval V2   */
+    numV2 += ((srcLen-fullCount*I_length - (I_length- I_start)
+               >I_select)
+              ? 1 : 0);  /* possible partial end interval V2 */
+  }
+  else  /* input is only a partial interval */
+  {
+    fullCount = 0;
+    numV2 = ( ( (I_select > I_start) 
+                && (srcLen > I_select - I_start) )
+              ? 1 : 0 );    
+  }    
+  numV1 = srcLen - numV2;
+  if( (numV2 > maxV2)
+      || (numV1 > maxV1) )
+  {
+    errval = - __LINE__; /* TODO, replace with err later */
+    goto exiterror;
+  }
+  
+  intervalCount=I_start;
+  for(i=0;i<srcLen;i++)
+  {
+    if(intervalCount==I_select)
+    {
+      *(pV2++) = *(pSrc++);
+    }
+    else
+    {
+      *(pV1++) = *(pSrc++);
+    }
+    intervalCount= ( (intervalCount+1<I_length)
+                     ? intervalCount+1 
+                     : 0 );
+  }
+  
+
+exiterror:
+
+  if(pNumV1 != NULL)
+  {
+    *pNumV1 = numV1;
+  }
+  if(pNumV2 != NULL)
+  {
+    *pNumV2 = numV2;
+  }
+  
+  return(errval);    
+}
