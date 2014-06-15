@@ -1,0 +1,10 @@
+build/
+build-aux/
+aclocal.m4
+autom4te.cache/
+m4/
+Makefile.in
+configure
+config.h
+config.h.in
+*~
