@@ -23,6 +23,9 @@ int main(int argc,char**argv)
   uint32_t I_select=0;
   uint32_t k;
 
+  (void)argc;  /* yes I'm not using */
+  (void)argv;  /* yes I'm not using */
+
 
   for(I_length=1;I_length<25;I_length++)
   {
@@ -86,6 +89,16 @@ int main(int argc,char**argv)
 
   
 exiterror:
+  if( errval != 0 )
+  {
+    printf("%s(L%i):vectorSeparate test FAILED errval=%i \n"
+           ,__FILE__,__LINE__,errval);
+  }
+  else
+  {
+    printf("%s(L%i):vectorSeparate test PASSED \n"
+           ,__FILE__,__LINE__);
+  }
   return(errval);
 
 }
