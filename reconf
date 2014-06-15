@@ -1,7 +1,7 @@
 #!/bin/bash
 #  typical options are  --force 
+if [ ! -d m4 ] ; then mkdir m4 ; fi
 autoreconf  --install $*  
 if [ ! -d build ] ; then mkdir build ; fi
-if [ ! -d m4 ] ; then mkdir m4 ; fi
 cd build
 ../configure CFLAGS="-Wall" --prefix=${INSTALLED_TOOLS_PATH}
